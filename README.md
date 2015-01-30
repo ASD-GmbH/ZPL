@@ -1,4 +1,4 @@
-# ZPL - F# Tool
+# ZPL for .net 
 
 [ZPL (ZeroMQ Property Language)](http://rfc.zeromq.org/spec:4) is a light-weight configuration file format.
 This library implements a simple parser and renderer for ZPL usable from any .net application or as a F# script.
