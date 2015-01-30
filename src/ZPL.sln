@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "ZPL", "ZPL\ZPL.fsproj", "{9DE3BF3D-EC53-40FC-B4C0-AEF8FB7CAAB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZPL_specification", "ZPL_specification\ZPL_specification.csproj", "{3A505CCB-67C3-493A-97B5-A162E205DCB8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{706B264D-E93B-4ADC-AF1B-A43C8F66F453}"
+	ProjectSection(SolutionItems) = preProject
+		..\.gitignore = ..\.gitignore
+		..\LICENSE.txt = ..\LICENSE.txt
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9DE3BF3D-EC53-40FC-B4C0-AEF8FB7CAAB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DE3BF3D-EC53-40FC-B4C0-AEF8FB7CAAB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DE3BF3D-EC53-40FC-B4C0-AEF8FB7CAAB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DE3BF3D-EC53-40FC-B4C0-AEF8FB7CAAB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A505CCB-67C3-493A-97B5-A162E205DCB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A505CCB-67C3-493A-97B5-A162E205DCB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A505CCB-67C3-493A-97B5-A162E205DCB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A505CCB-67C3-493A-97B5-A162E205DCB8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
