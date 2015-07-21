@@ -124,4 +124,9 @@ module ZPL =
     let parse_relaxed input : ZPL_set = Parser.parse_set false input []
 
 
-
+    module API =
+        let top_section(name:string) (elements:ZPL_element seq) = top_section name <| Seq.toArray elements
+        let section (name:string) (elements:ZPL_element seq) = section name <| Seq.toArray elements
+        let kv (key:string) (value:string) = kv key value
+        let single (section:ZPL_section) = [section]
+        let to_zpl (sections: ZPL_section seq) = Seq.toArray sections |> create |> render
