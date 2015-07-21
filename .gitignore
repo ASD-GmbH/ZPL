@@ -39,3 +39,4 @@ packages/*
 *.gen.vb
 packages/
 src/ZPL.sln.ide/
+*.nupkg

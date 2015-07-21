@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>ZPL</id>
+    <version>0.0.2</version>
+    <authors>Philip Jander, Jander IT</authors>
+    <owners>Jander IT</owners>
+    <licenseUrl>https://raw.githubusercontent.com/janderit/ZPL/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/janderit/ZPL</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ZPL for .net - lightweight ZeroMQ Property Language renderer and parser</description>
+    <tags>ZPL ZeroMQ</tags>
+    <dependencies>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="ZPL\bin\Debug\ZPL.dll" target="lib/net40" />
+	  <file src="ZPL\bin\Debug\ZPL.pdb" target="lib/net40" />
+  </files>
+</package>

@@ -1,5 +1,6 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
+using JanderIT;
 
 namespace JanderIT.ZPL_Specs
 {

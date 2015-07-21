@@ -5,7 +5,7 @@ This library implements a simple parser and renderer for ZPL usable from any .ne
 
 ## Status
 
-This library is a draft. Build process, nupkg generation, documentation, Paket support are intended.
+This library is a draft. Build process, nupkg generation, documentation, will follow.
 
 ## Usage
 
