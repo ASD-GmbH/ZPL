@@ -38,3 +38,4 @@ packages/*
 *.gen.cs
 *.gen.vb
 packages/
+src/ZPL.sln.ide/

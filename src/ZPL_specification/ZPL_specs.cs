@@ -11,7 +11,7 @@ namespace JanderIT.ZPL_Specs
         {
             var demo = ZPL.render(ZPL.create(ZPL.top_section("hello", ZPL.kv("who", "world"), ZPL.section("welcome", ZPL.kv("who", "earth"))), ZPL.top_section("test", ZPL.kv("what", "data"))));
             const string expected = "hello\r\n    who=world\r\n    welcome\r\n        who=earth\r\ntest\r\n    what=data\r\n";
-            
+
             demo.Should().Be(expected);
         }
 
@@ -31,7 +31,7 @@ namespace JanderIT.ZPL_Specs
             ZPL.render(ZPL.parse_relaxed(demo)).Should().Be(demo);
         }
 
-        
+
         [Test]
         public void ignore_empty_lines()
         {
