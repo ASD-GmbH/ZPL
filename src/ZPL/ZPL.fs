@@ -24,71 +24,136 @@ module ZPL =
     and ZPL_set = ZPL_section array
 
     module internal Parser =
-        let split_first_line (input : string) =
-            let parts = input.Split([| "\r\n"; "\r"; "\n" |], 2, StringSplitOptions.None)
+      let is_comment strict (line : String) =
+        line.StartsWith "#" || (not strict && line.StartsWith "//")
 
-            let remainder =
-                if parts.Length > 1 then parts.[1].TrimStart([| '\r'; '\n' |])
-                else ""
+      let is_begin_of_comment_block (line : String) =
+        line.StartsWith "/*"
 
-            let next_line = parts.[0]
-            next_line, remainder
+      let is_end_of_comment_block (line : String) =
+        line.EndsWith "*/"
 
-        let rec slurp_comment_block input =
-            let next_line, remainder = split_first_line input
-            if (next_line.TrimEnd().EndsWith("*/")) then remainder
-            else slurp_comment_block remainder
+      let evaluate_line strict (in_comment_block, lines) (line : string) : bool * string list =
+        let trimmedLine = line.Trim()
+        if in_comment_block then
+          (not (trimmedLine |> is_end_of_comment_block), lines)
+        else if trimmedLine |> is_comment strict then
+          (in_comment_block, lines)
+        else if not strict && trimmedLine |> is_begin_of_comment_block then
+          (true, lines)
+        else
+          (in_comment_block, line::lines)
 
-        let check_line_comment (strict : bool) (input : string) =
-            let trimmed = input.Trim()
-            trimmed.StartsWith("#") || (not strict && trimmed.StartsWith("//"))
+      let lines_without_comments strict (input : string) =
+        input.Split([| "\r\n"; "\r"; "\n" |], StringSplitOptions.RemoveEmptyEntries)
+        |> Array.fold (evaluate_line strict) (false, [])
+        |> fun (_, lines) -> lines
+        |> List.rev
 
-        let check_block_comment (strict : bool) (input : string) =
-            let trimmed = input.Trim()
-            (not strict && trimmed.StartsWith("/*"))
+      let indentation_of (line : string) =
+        line
+        |> Seq.takeWhile (fun c -> c = ' ')
+        |> Seq.length
+        |> fun lenght -> lenght / 4
+        |> int
 
-        let rec get_line strict input =
-            let next_line, remainder = split_first_line input
-            let is_line_comment = check_line_comment strict next_line
-            let is_block_comment = check_block_comment strict next_line
-            if is_block_comment then slurp_comment_block input |> get_line strict
-            else if is_line_comment then get_line strict remainder
-            else next_line, remainder
+      type Parsing_Element =
+        | ParsedSection of Parsing_Section
+        | ParsedValue of ZPL_KeyValue
 
-        let get_indent (line : string) =
-            System.Linq.Enumerable.Count(System.Linq.Enumerable.TakeWhile(line, (fun c -> c = ' '))) / 4
+      and Parsing_Section =
+        { name: string
+          elements : Parsing_Element list
+        }
 
-        let parse_key_value (input : string) =
-            let parts = input.TrimStart().Split([| '=' |], 2)
-            { Key = parts.[0]
-              Value = parts.[1] }
+      type Parsing_current_Section =
+        | Root of Parsing_Section
+        | Nested of level:int * Parsing_Section * Parsing_current_Section
 
-        let rec parse_section_body indent strict input (elements : ZPL_element list) =
-            let next_line, remainder = get_line strict input
-            if (get_indent next_line) <> indent then elements, input
-            else if next_line.Contains("=") then
-                parse_section_body indent strict remainder (Value(parse_key_value next_line) :: elements)
+      let tryParseKeyValue (input : string) : ZPL_KeyValue option =
+        let parts = input.TrimStart().Split([| '=' |], 2)
+        if parts.Length = 2 then
+          Some { Key = parts.[0] ; Value = parts.[1] }
+        else
+          None
+
+      let section_from_line (name : string) : Parsing_Section =
+        { name = name.Trim()
+          elements = [] }
+
+      let with_sub_section (sub : Parsing_Section) (section : Parsing_Section) =
+        { section with elements = ParsedSection sub::section.elements }
+
+      let rec resolve_section until_level (section : Parsing_Section) (parent : Parsing_current_Section) : (Parsing_Section * Parsing_current_Section option) =
+        match parent with
+        | Root (parentSection) ->
+            parentSection |> with_sub_section section, None
+
+        | Nested (level, parentSection, parentValue) ->
+            let next_Section = parentSection |> with_sub_section section
+            if level = until_level then
+              next_Section, Some parentValue
             else
-                let subsection, remainder = parse_section strict input
-                parse_section_body indent strict remainder (Section(subsection) :: elements)
+              resolve_section until_level next_Section parentValue
 
-        and parse_section strict input : ZPL_section * string =
-            let name, remainder = get_line strict input
-            let indent = get_indent name
-            let elements, remainder = parse_section_body (indent + 1) strict remainder []
-            { Name = (name.Trim())
-              Elements =
-                  elements
-                  |> Seq.toArray
-                  |> Array.rev }, remainder
+      let element_into (section : Parsing_Section) (element : ZPL_KeyValue) =
+        { section with elements = ParsedValue element::section.elements }
 
-        and parse_set strict input concat_with : ZPL_set =
-            let section, remaining = parse_section strict input
-            if not (String.IsNullOrWhiteSpace(remaining)) then parse_set strict remaining (section :: concat_with)
-            else
-                (section :: concat_with)
-                |> Seq.toArray
-                |> Array.rev
+      let parseLine (into : Parsing_Section -> Parsing_current_Section) (section : Parsing_Section) (line : String) : Parsing_current_Section =
+        tryParseKeyValue line
+        |> Option.map (element_into section)
+        |> Option.map into
+        |> Option.defaultValue (Nested (1, section_from_line line, into section))
+
+      let evaluate_element (current, set) (line : string) : (Parsing_current_Section * Parsing_Section list) =
+        match current with
+        | Root section ->
+            (parseLine Root section line, set)
+
+        | Nested (indentation, section, parent) ->
+            let current_indentation = indentation_of line
+
+            let (next,nextParent) =
+              if current_indentation < indentation then
+                resolve_section current_indentation section parent
+              else
+                (section, Some parent)
+
+            nextParent
+            |> Option.map (fun p -> (parseLine (fun s -> Nested (current_indentation, s, p)) next line), set)
+            |> Option.defaultValue (Root (section_from_line line), next::set)
+
+      let rec section_of (value : Parsing_current_Section) : Parsing_Section =
+        match value with
+        | Root section -> section
+        | Nested (_, section, parent) ->
+            section_of parent
+            |> with_sub_section section
+
+      let rec as_ZPL_section (value : Parsing_Section) : ZPL_section =
+        { Name = value.name
+          Elements =
+            value.elements
+            |> List.map (function | ParsedSection s -> s |> as_ZPL_section |> Section | ParsedValue v -> Value v)
+            |> List.rev
+            |> List.toArray
+        }
+
+      let parse_set strict (input : string): ZPL_set =
+        match input |> lines_without_comments strict with
+        | [] ->
+            [||]
+
+        | [line] ->
+            [| section_from_line line |> as_ZPL_section |]
+
+        | line::rest ->
+            rest
+            |> List.fold evaluate_element (Root (section_from_line line), [])
+            |> (fun (last, set) -> section_of last::set)
+            |> List.map as_ZPL_section
+            |> List.rev
+            |> List.toArray
 
     module internal Generator =
         let padding indent_level = "".PadLeft(4 * indent_level, ' ')
@@ -117,8 +182,8 @@ module ZPL =
         Section(top_section name elements)
     let create ([<ParamArray>] sections : ZPL_section array) : ZPL_set = sections
     let render (set : ZPL_set) : string = String.Join("", set |> Seq.map (Generator.render_section 0))
-    let parse input : ZPL_set = Parser.parse_set true input []
-    let parse_relaxed input : ZPL_set = Parser.parse_set false input []
+    let parse input : ZPL_set = Parser.parse_set true input
+    let parse_relaxed input = Parser.parse_set false input
 
     module API =
         let top_section (name : string) (elements : ZPL_element seq) = top_section name <| Seq.toArray elements

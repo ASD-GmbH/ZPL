@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using NUnit.Framework;
-using JanderIT;
 
 namespace JanderIT.ZPL_Specs
 {
@@ -65,6 +64,16 @@ namespace JanderIT.ZPL_Specs
             const string demo = "hello\r\n    who=world\r\n    welcome\r\n        who=earth\r\ntest\r\n    what=data\r\n";
             const string demo1 = "hello\r\n    /*COMMENT\r\n MORE COMMENT*/\r\n    who=world\r\n    welcome\r\n        who=earth\r\n  test\r\n    what=data\r\n";
             ZPL.render(ZPL.parse_relaxed(demo1)).Should().Be(demo);
+        }
+
+        [Test, Explicit]
+        public void benchmark()
+        {
+            const string demo1 = "//COMMENT\r\nhello\r\n    //COMMENT\r\n    who=world\r\n    welcome\r\n        who=earth\r\n  //COMMENT\r\ntest\r\n    what=data\r\n";
+            for (int i = 0; i < 1000000; i++)
+            {
+                ZPL.parse_relaxed(demo1);
+            }
         }
     }
 }
