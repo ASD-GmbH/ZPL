@@ -1,9 +1,9 @@
 ﻿(*
- * ZPL F# Tool (https://github.com/janderit/ZPL.git)
- * Philip Jander, 2015
- *
- * This file and its project are licensed under the GNU LESSER GENERAL PUBLIC LICENSE v3 (LGPLv3).
- *)
+* ZPL F# Tool (https://github.com/ASD-GmbH/ZPL)
+* Philip Jander, 2015
+*
+* This file and its project are licensed under the GNU LESSER GENERAL PUBLIC LICENSE v3 (LGPLv3).
+*)
 namespace JanderIT
 
 module ZPL =
