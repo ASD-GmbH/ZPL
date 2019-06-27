@@ -66,6 +66,13 @@ namespace JanderIT.ZPL_Specs
             ZPL.render(ZPL.parse_relaxed(demo1)).Should().Be(demo);
         }
 
+        [Test]
+        public void parse_one_root_section_with_multiple_subsections()
+        {
+            const string input = "root\r\n    nested\r\n        name=first\r\n    nested\r\n        name=second\r\n    nested\r\n        name=third\r\n";
+            ZPL.render(ZPL.parse(input)).Should().Be(input);
+        }
+
         [Test, Explicit]
         public void benchmark()
         {
