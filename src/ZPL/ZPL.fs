@@ -53,7 +53,7 @@ module ZPL =
       |> List.rev
 
     let indentation_of (line : string) =
-      line
+      line.ToCharArray()
       |> Seq.takeWhile (fun c -> c = ' ')
       |> Seq.length
       |> fun lenght -> lenght / 4
@@ -73,14 +73,14 @@ module ZPL =
     | Nested of level:int * Parsing_Section * Parsing_current_Section
 
     let tryParseKeyValue (input : string) : ZPL_KeyValue option =
-      let parts = input.TrimStart().Split([| '=' |], 2)
+      let parts = input.Split([| '=' |], 2)
       if parts.Length = 2 then
         Some { Key = parts.[0] ; Value = parts.[1] }
       else
         None
 
     let section_from_line (name : string) : Parsing_Section =
-      { name = name.Trim()
+      { name = name
         elements = [] }
 
     let with_sub_section (sub : Parsing_Section) (section : Parsing_Section) =
@@ -110,10 +110,11 @@ module ZPL =
     let evaluate_element (current, set) (line : string) : (Parsing_current_Section * Parsing_Section list) =
       match current with
       | Root section ->
-          (parseLine Root section line, set)
+          (line.Trim() |> parseLine Root section, set)
 
       | Nested (indentation, section, parent) ->
           let current_indentation = indentation_of line
+          let trimmedLine = line.Trim()
 
           let (next,nextParent) =
             if current_indentation < indentation then
@@ -123,10 +124,10 @@ module ZPL =
 
           match nextParent with
           | Some p ->
-              (parseLine (fun s -> Nested (current_indentation, s, p)) next line, set)
+              (parseLine (fun s -> Nested (current_indentation, s, p)) next trimmedLine, set)
 
           | None ->
-              let newSection = section_from_line line
+              let newSection = section_from_line trimmedLine
               if current_indentation = 0 then
                 (Root newSection, next::set)
               else
