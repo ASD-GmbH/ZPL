@@ -133,12 +133,11 @@ module ZPL =
               else
                 (Nested (current_indentation, newSection, Root next), set)
 
-    let rec section_of (value : Parsing_current_Section) : Parsing_Section =
+    let rec section_of (value : Parsing_current_Section) (mapper : Parsing_Section -> Parsing_Section) : Parsing_Section =
       match value with
-      | Root section -> section
+      | Root section -> mapper section
       | Nested (_, section, parent) ->
-          section_of parent
-          |> with_sub_section section
+          section_of parent (with_sub_section (section |> mapper))
 
     let rec as_ZPL_section (value : Parsing_Section) : ZPL_section =
       { Name = value.name
@@ -160,7 +159,7 @@ module ZPL =
       | line::rest ->
           rest
           |> List.fold evaluate_element (Root (section_from_line line), [])
-          |> (fun (last, set) -> section_of last::set)
+          |> (fun (last, set) -> section_of last id::set)
           |> List.map as_ZPL_section
           |> List.rev
           |> List.toArray

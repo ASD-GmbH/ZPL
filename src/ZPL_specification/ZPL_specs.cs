@@ -80,6 +80,13 @@ namespace JanderIT.ZPL_Specs
             ZPL.render(ZPL.parse(input)).Should().Be(input);
         }
 
+        [Test]
+        public void parse_two_deep_sections_and_end_with_nested_section()
+        {
+            const string input = "root\r\n    nested\r\n        name=first\r\n        subnested\r\n            name=second\r\n            subsubnested\r\n                name=third\r\n";
+            ZPL.render(ZPL.parse(input)).Should().Be(input);
+        }
+
         [Test, Explicit]
         public void benchmark()
         {
