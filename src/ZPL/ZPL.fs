@@ -26,22 +26,22 @@ module ZPL =
   and ZPL_set = ZPL_section array
 
   module internal Parser =
-    let is_comment strict (line : String) =
-      line.StartsWith "#" || (not strict && line.StartsWith "//")
+    let is_comment strict (line : char []) =
+      line.[0] = '#' || (not strict && line.[0] = '/' && line.[1] = '/')
 
-    let is_begin_of_comment_block (line : String) =
-      line.StartsWith "/*"
+    let is_begin_of_comment_block (line : char []) =
+      line.[0] = '/' && line.[1] = '*'
 
     let is_end_of_comment_block (line : String) =
       line.EndsWith "*/"
 
     let evaluate_line strict (in_comment_block, lines) (line : string) : bool * string list =
-      let trimmedLine = line.Trim()
+      let prefix = line.TrimStart().ToCharArray() |> Array.truncate 2
       if in_comment_block then
-        (not (trimmedLine |> is_end_of_comment_block), lines)
-      else if trimmedLine |> is_comment strict then
+        (not (line.TrimEnd() |> is_end_of_comment_block), lines)
+      else if prefix |> is_comment strict then
         (in_comment_block, lines)
-      else if not strict && trimmedLine |> is_begin_of_comment_block then
+      else if not strict && prefix |> is_begin_of_comment_block then
         (true, lines)
       else
         (in_comment_block, line::lines)
@@ -105,7 +105,7 @@ module ZPL =
       tryParseKeyValue line
       |> Option.map (element_into section)
       |> Option.map into
-      |> Option.defaultValue (Nested (1, section_from_line line, into section))
+      |> Option.defaultWith (fun () -> Nested (1, section_from_line line, into section))
 
     let evaluate_element (current, set) (line : string) : (Parsing_current_Section * Parsing_Section list) =
       match current with

@@ -73,6 +73,13 @@ namespace JanderIT.ZPL_Specs
             ZPL.render(ZPL.parse(input)).Should().Be(input);
         }
 
+        [Test]
+        public void parse_section_with_single_char_as_name()
+        {
+            const string input = "a\r\n    name=first\r\n";
+            ZPL.render(ZPL.parse(input)).Should().Be(input);
+        }
+
         [Test, Explicit]
         public void benchmark()
         {
