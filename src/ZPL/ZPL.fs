@@ -26,13 +26,13 @@ module ZPL =
   and ZPL_set = ZPL_section array
 
   module internal Parser =
-    let is_comment strict (line : char []) =
+    let inline is_comment strict (line : char []) =
       line.[0] = '#' || (not strict && line.[0] = '/' && line.[1] = '/')
 
-    let is_begin_of_comment_block (line : char []) =
+    let inline is_begin_of_comment_block (line : char []) =
       line.[0] = '/' && line.[1] = '*'
 
-    let is_end_of_comment_block (line : String) =
+    let inline is_end_of_comment_block (line : String) =
       line.EndsWith "*/"
 
     let evaluate_line strict (in_comment_block, lines) (line : string) : bool * string list =
@@ -79,11 +79,11 @@ module ZPL =
       else
         None
 
-    let section_from_line (name : string) : Parsing_Section =
+    let inline section_from_line (name : string) : Parsing_Section =
       { name = name
         elements = [] }
 
-    let with_sub_section (sub : Parsing_Section) (section : Parsing_Section) =
+    let inline with_sub_section (sub : Parsing_Section) (section : Parsing_Section) =
       { section with elements = ParsedSection sub::section.elements }
 
     let rec resolve_section until_level (section : Parsing_Section) (parent : Parsing_current_Section) : (Parsing_Section * Parsing_current_Section option) =
@@ -98,7 +98,7 @@ module ZPL =
           else
             resolve_section until_level next_Section parentValue
 
-    let element_into (section : Parsing_Section) (element : ZPL_KeyValue) =
+    let inline element_into (section : Parsing_Section) (element : ZPL_KeyValue) =
       { section with elements = ParsedValue element::section.elements }
 
     let parseLine (into : Parsing_Section -> Parsing_current_Section) (section : Parsing_Section) (line : String) : Parsing_current_Section =
